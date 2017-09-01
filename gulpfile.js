@@ -1,7 +1,6 @@
 var gulp = require('gulp'),
     sass = require('gulp-sass'),
     sourcemaps = require('gulp-sourcemaps'),
-    fileinclude = require('gulp-file-include'),
     htmlbeautify = require('gulp-html-beautify'),
     browserSync = require('browser-sync'),
     concat = require('gulp-concat'),
@@ -14,6 +13,7 @@ var gulp = require('gulp'),
     cache = require('gulp-cache'),
     postcss = require('gulp-postcss'),
     gcmq = require('gulp-group-css-media-queries'),
+    nunjucksRender = require('gulp-nunjucks-render'),
     autoprefixer = require('gulp-autoprefixer');
 
 gulp.task('sass', function(){
@@ -27,12 +27,11 @@ gulp.task('sass', function(){
 	.pipe(browserSync.reload({stream: true}))
 });
 
-gulp.task('fileinclude', function() {
-    gulp.src(['templates/*.html'])
-        .pipe(fileinclude({
-            prefix: '@@'
+gulp.task('fileinclude', function () {
+    return gulp.src('templates/*.html')
+        .pipe(nunjucksRender({
+            path: ['templates/'] // String or Array
         }))
-        .pipe(htmlbeautify())
         .pipe(gulp.dest('app/'));
 });
 
@@ -84,7 +83,7 @@ gulp.task('images', function(){
 
 gulp.task('watch', ['browser-sync','sass','fileinclude'], function(){
 	gulp.watch('app/sass/**/*.sass', ['sass']);
-    gulp.watch('templates/**/*.html', ['fileinclude']);
+    gulp.watch('templates/*.html', ['fileinclude']);
 	gulp.watch('app/*.html', browserSync.reload);
 	gulp.watch('app/js/**/*.js', browserSync.reload);
 });
